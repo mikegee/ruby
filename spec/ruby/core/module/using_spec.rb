@@ -1,5 +1,4 @@
-require File.expand_path('../../../spec_helper', __FILE__)
-require File.expand_path('../fixtures/using', __FILE__)
+require_relative '../../spec_helper'
 
 describe "Module#using" do
   it "imports class refinements from module into the current class/module" do
@@ -25,7 +24,7 @@ describe "Module#using" do
       end
     end
 
-    -> () {
+    -> {
       Module.new do
         using refinement
       end
@@ -35,7 +34,7 @@ describe "Module#using" do
   it "accepts module without refinements" do
     mod = Module.new
 
-    -> () {
+    -> {
       Module.new do
         using mod
       end
@@ -45,7 +44,7 @@ describe "Module#using" do
   it "does not accept class" do
     klass = Class.new
 
-    -> () {
+    -> {
       Module.new do
         using klass
       end
@@ -53,7 +52,7 @@ describe "Module#using" do
   end
 
   it "raises TypeError if passed something other than module" do
-    -> () {
+    -> {
       Module.new do
         using "foo"
       end
@@ -90,11 +89,11 @@ describe "Module#using" do
   it "raises error in method scope" do
     mod = Module.new do
       def self.foo
-        using ModuleSpecs::EmptyRefinement
+        using Module.new {}
       end
     end
 
-    -> () {
+    -> {
       mod.foo
     }.should raise_error(RuntimeError, /Module#using is not permitted in methods/)
   end
@@ -156,7 +155,11 @@ describe "Module#using" do
 
       Module.new do
         Class.new do
-          using ModuleSpecs::RefinementForStringToS
+          using Module.new {
+            refine String do
+              def to_s; "hello from refinement"; end
+            end
+          }
           ScratchPad << "1".to_s
         end
 
@@ -175,7 +178,11 @@ describe "Module#using" do
       Module.new do
         Class.new do
           ScratchPad << "1".to_s
-          using ModuleSpecs::RefinementForStringToS
+          using Module.new {
+            refine String do
+              def to_s; "hello from refinement"; end
+            end
+          }
           ScratchPad << "1".to_s
         end
       end
@@ -241,7 +248,11 @@ describe "Module#using" do
 
       Module.new do
         if false
-          using ModuleSpecs::RefinementForStringToS
+          using Module.new {
+            refine String do
+              def to_s; "hello from refinement"; end
+            end
+          }
         end
         result = "1".to_s
       end
